@@ -1,48 +1,57 @@
 # MCP-Busbar
 
-A modern web application featuring a **React-based frontend with node-based UI** and a **Python FastAPI backend**.
+A powerful visual builder for **Model Context Protocol (MCP) Servers** with dual node-based UI options (React Flow & GoJS) and a Python FastAPI backend.
 
 ## Features
 
-- **Node-based UI**: Interactive drag-and-drop node editor built with React Flow
-- **FastAPI Backend**: High-performance Python backend with RESTful API
-- **Real-time Updates**: Save and load node flows with persistent storage
-- **Modern Stack**: React 18, Vite, FastAPI, and modern web technologies
-- **Beautiful Design**: Gradient UI with smooth animations and transitions
-- **Docker Support**: Easy deployment with Docker and Docker Compose
+- **🎨 Dual Diagram Libraries**: Choose between React Flow or GoJS for your preferred diagramming experience
+- **🔌 MCP Server Builder**: Visually design and generate complete MCP servers
+- **🛠️ Tool Creation**: Define custom tools with input schemas and implementations
+- **📚 Resource Management**: Configure resources with URIs and MIME types
+- **💬 Prompt Templates**: Create reusable prompt templates with arguments
+- **📦 One-Click Export**: Export complete MCP servers as ready-to-use ZIP files
+- **🚀 FastAPI Backend**: High-performance Python backend with RESTful API
+- **🐳 Docker Support**: Easy deployment with Docker and Docker Compose
+- **💾 Real-time Persistence**: Save and load your designs
+
+## What is MCP?
+
+The Model Context Protocol (MCP) is an open protocol that enables seamless integration between LLM applications and external data sources and tools. MCP-Busbar makes it easy to build MCP servers visually without writing code.
 
 ## Project Structure
 
 ```
 MCP-Busbar/
-├── backend/                 # FastAPI backend
+├── backend/                    # FastAPI backend
 │   ├── app/
 │   │   ├── __init__.py
-│   │   └── main.py         # Main FastAPI application
-│   ├── requirements.txt    # Python dependencies
+│   │   ├── main.py            # Main FastAPI application
+│   │   ├── models.py          # MCP data models
+│   │   └── mcp_generator.py   # MCP server code generator
+│   ├── requirements.txt
 │   └── Dockerfile
 │
-├── frontend/               # React frontend
+├── frontend/                   # React frontend
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── CustomNode.jsx
-│   │   │   └── Flow.jsx
+│   │   │   ├── Flow.jsx              # React Flow diagram
+│   │   │   ├── GoJSDiagram.jsx       # GoJS diagram
+│   │   │   ├── MCPServerNode.jsx     # MCP Server node
+│   │   │   ├── MCPToolNode.jsx       # Tool node
+│   │   │   ├── MCPResourceNode.jsx   # Resource node
+│   │   │   └── MCPPromptNode.jsx     # Prompt node
 │   │   ├── services/
-│   │   │   └── api.js
+│   │   │   └── api.js                # API client
 │   │   ├── styles/
-│   │   │   ├── App.css
-│   │   │   └── NodeStyles.css
 │   │   ├── App.jsx
 │   │   └── main.jsx
-│   ├── index.html
 │   ├── package.json
 │   ├── vite.config.js
-│   ├── nginx.conf
 │   └── Dockerfile
 │
-├── docker-compose.yml      # Production Docker Compose
-├── docker-compose.dev.yml  # Development Docker Compose
-└── .env.example           # Environment variables template
+├── docker-compose.yml          # Production setup
+├── docker-compose.dev.yml      # Development setup
+└── .env.example
 ```
 
 ## Prerequisites
@@ -54,49 +63,35 @@ MCP-Busbar/
 ### Option 2: Manual Setup
 - **Python**: 3.8 or higher
 - **Node.js**: 16 or higher
-- **npm**: 7 or higher (comes with Node.js)
+- **npm**: 7 or higher
 
 ## Quick Start with Docker (Recommended)
 
-This is the easiest way to run the application without manual setup.
-
 ### Production Mode
 
-1. Clone the repository and navigate to the project directory
-
-2. Build and start the containers:
 ```bash
+# Clone and start
 docker-compose up --build
-```
 
-3. Access the application:
-   - **Frontend**: http://localhost
-   - **Backend API**: http://localhost:8000
-   - **API Docs**: http://localhost:8000/docs
-
-4. To stop the containers:
-```bash
-docker-compose down
+# Access the application
+# Frontend: http://localhost
+# Backend: http://localhost:8000
+# API Docs: http://localhost:8000/docs
 ```
 
 ### Development Mode (with hot-reload)
 
-For development with automatic code reloading:
-
 ```bash
 docker-compose -f docker-compose.dev.yml up --build
+
+# Frontend: http://localhost:3000
+# Backend: http://localhost:8000
 ```
-
-Access the application:
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-
-This mode mounts your local code into the containers, so changes are reflected immediately.
 
 ### Docker Commands
 
 ```bash
-# Start containers in detached mode
+# Start in background
 docker-compose up -d
 
 # View logs
@@ -105,168 +100,313 @@ docker-compose logs -f
 # Stop containers
 docker-compose down
 
-# Rebuild containers after dependency changes
+# Rebuild after changes
 docker-compose up --build
 
-# Remove containers and volumes
+# Clean up everything
 docker-compose down -v
 ```
 
-## Manual Installation & Setup
-
-If you prefer not to use Docker:
+## Manual Setup
 
 ### Backend Setup
 
-1. Navigate to the backend directory:
 ```bash
 cd backend
-```
-
-2. Create a virtual environment (recommended):
-```bash
 python -m venv venv
-```
 
-3. Activate the virtual environment:
-   - On Linux/Mac:
-     ```bash
-     source venv/bin/activate
-     ```
-   - On Windows:
-     ```bash
-     venv\Scripts\activate
-     ```
+# Activate virtual environment
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
 
-4. Install dependencies:
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Run server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Frontend Setup
 
-1. Navigate to the frontend directory:
 ```bash
 cd frontend
-```
-
-2. Install dependencies:
-```bash
 npm install
-```
-
-## Running the Application Manually
-
-You need to run both the backend and frontend servers simultaneously.
-
-### Start the Backend Server
-
-1. Navigate to the backend directory:
-```bash
-cd backend
-```
-
-2. Activate your virtual environment (if not already activated)
-
-3. Run the FastAPI server:
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-The API will be available at:
-- **API**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
-- **Alternative Docs**: http://localhost:8000/redoc
-
-### Start the Frontend Server
-
-1. In a new terminal, navigate to the frontend directory:
-```bash
-cd frontend
-```
-
-2. Run the development server:
-```bash
 npm run dev
 ```
 
-The application will be available at:
-- **Frontend**: http://localhost:3000
+## Using MCP-Busbar
+
+### 1. Choose Your Diagram Library
+
+MCP-Busbar supports two powerful diagramming libraries:
+
+- **React Flow**: Modern, lightweight, and highly customizable
+- **GoJS**: Feature-rich commercial library (free for evaluation/non-commercial use)
+
+Switch between them using the toggle button in the UI.
+
+### 2. Build Your MCP Server
+
+#### Create an MCP Server Node
+
+1. The diagram starts with an **MCP Server** node (purple, with 🖥️ icon)
+2. Click "Configure" to set:
+   - Server name
+   - Description
+   - Version
+
+#### Add Tools
+
+1. Add **Tool nodes** (orange, with 🔧 icon)
+2. Configure each tool:
+   - **Name**: Tool identifier (e.g., `get_weather`)
+   - **Description**: What the tool does
+   - **Input Schema**: JSON schema for tool parameters
+   - **Implementation**: Python code for the tool logic
+
+Example tool configuration:
+```json
+{
+  "type": "object",
+  "properties": {
+    "location": {
+      "type": "string",
+      "description": "City name"
+    }
+  },
+  "required": ["location"]
+}
+```
+
+#### Add Resources
+
+1. Add **Resource nodes** (green, with 📄 icon)
+2. Configure:
+   - **Name**: Resource identifier
+   - **URI**: Resource location (e.g., `file:///data/notes.txt`)
+   - **Description**: Resource description
+   - **MIME Type**: Content type (e.g., `text/plain`)
+
+#### Add Prompts
+
+1. Add **Prompt nodes** (blue, with 💬 icon)
+2. Configure:
+   - **Name**: Prompt identifier
+   - **Description**: Prompt purpose
+   - **Template**: Prompt text with `{{variable}}` placeholders
+   - **Arguments**: JSON array of argument definitions
+
+Example prompt template:
+```
+Analyze the following {{data_type}} and provide insights:
+
+{{content}}
+
+Focus on: {{focus_area}}
+```
+
+### 3. Connect Nodes
+
+- Draw connections from Tools/Resources/Prompts **to** the MCP Server node
+- Connections define which components are part of your server
+
+### 4. Generate & Export
+
+Click **"Export MCP Server (ZIP)"** to download a complete package containing:
+
+- `server.py` - Complete MCP server implementation
+- `requirements.txt` - Python dependencies
+- `README.md` - Usage instructions
+
+### 5. Use Your MCP Server
+
+```bash
+# Unzip the export
+unzip my_mcp_server.zip
+cd my_mcp_server
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the server
+python server.py
+```
+
+### 6. Integrate with Claude Desktop
+
+Add to your Claude Desktop configuration (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "python",
+      "args": ["/path/to/server.py"]
+    }
+  }
+}
+```
 
 ## API Endpoints
 
-The backend provides the following endpoints:
+### Flow Management
 
-- `GET /` - Root endpoint with API information
-- `GET /health` - Health check endpoint
+- `GET /` - API information
+- `GET /health` - Health check
 - `GET /nodes` - Get all nodes
-- `POST /nodes` - Create a new node
+- `POST /nodes` - Create node
 - `GET /edges` - Get all edges
-- `POST /edges` - Create a new edge
-- `GET /flow` - Get the entire flow (nodes + edges)
-- `POST /flow` - Save the entire flow
-- `DELETE /flow` - Clear all nodes and edges
+- `POST /edges` - Create edge
+- `GET /flow` - Get entire flow
+- `POST /flow` - Save flow
+- `DELETE /flow` - Clear flow
 
-## Usage
+### MCP Server Management
 
-1. **Create Nodes**: The application starts with three sample nodes
-2. **Connect Nodes**: Drag from one node's handle to another to create connections
-3. **Move Nodes**: Click and drag nodes to reposition them
-4. **Save Flow**: Click the "Save Flow" button to persist your work to the backend
-5. **Load Flow**: Click the "Load Flow" button to retrieve saved flows
-6. **Clear Flow**: Click the "Clear Flow" button to reset everything
+- `POST /mcp/server` - Create/update MCP server configuration
+- `GET /mcp/servers` - List all MCP servers
+- `GET /mcp/server/{id}` - Get specific server
+- `DELETE /mcp/server/{id}` - Delete server
+- `POST /mcp/generate/{id}` - Generate server code
+- `POST /mcp/export/{id}` - Export server as ZIP
+- `POST /mcp/flow-to-server` - Convert flow to MCP server
 
-## Features in Detail
+## Node Types
 
-### Node Types
+### MCP Server Node (Purple)
+Central hub for your MCP server. All tools, resources, and prompts connect to this node.
 
-- **Input Node** (Green): Starting point for data flow
-- **Process Node** (Blue): Intermediate processing steps
-- **Output Node** (Red): Final output or result
+**Properties:**
+- Name: Server identifier
+- Description: Server purpose
+- Version: Semantic version
 
-### Controls
+### Tool Node (Orange)
+Defines executable tools that can be called by LLMs.
 
-- **Pan**: Click and drag on the background
-- **Zoom**: Use mouse wheel or the zoom controls
-- **Minimap**: Overview of the entire flow in the bottom-right
-- **Background**: Dotted grid for better visual alignment
+**Properties:**
+- Name: Tool function name
+- Description: Tool documentation
+- Input Schema: JSON schema for parameters
+- Implementation: Python code
+
+### Resource Node (Green)
+Exposes data sources to the MCP server.
+
+**Properties:**
+- Name: Resource identifier
+- URI: Resource location
+- Description: Resource documentation
+- MIME Type: Content type
+
+### Prompt Node (Blue)
+Reusable prompt templates with variable substitution.
+
+**Properties:**
+- Name: Prompt identifier
+- Description: Prompt purpose
+- Template: Text with `{{variables}}`
+- Arguments: Array of argument definitions
+
+## Diagram Libraries
+
+### React Flow
+
+**Pros:**
+- MIT licensed (free for all uses)
+- Lightweight and performant
+- Great for simple to medium complexity diagrams
+- Active open-source community
+
+**Best for:** Most use cases, open-source projects
+
+### GoJS
+
+**Pros:**
+- Highly feature-rich
+- Advanced layout algorithms
+- Professional-grade diagrams
+- Extensive customization
+
+**Cons:**
+- Requires commercial license ($1,500+) for production use
+- Larger bundle size
+
+**Best for:** Complex enterprise diagrams, commercial projects
+
+**Licensing:** GoJS is free for evaluation and non-commercial use. For commercial use, purchase a license at [gojs.net](https://gojs.net).
+
+## Examples
+
+### Weather Tool MCP Server
+
+**Server Configuration:**
+- Name: "Weather Server"
+- Description: "Provides weather information"
+
+**Tool:**
+- Name: `get_weather`
+- Description: "Get current weather for a location"
+- Input Schema:
+  ```json
+  {
+    "type": "object",
+    "properties": {
+      "location": {"type": "string"}
+    }
+  }
+  ```
+- Implementation:
+  ```python
+  import requests
+  weather_data = requests.get(f"https://api.weather.com/{arguments['location']}")
+  return f"Weather in {arguments['location']}: {weather_data.json()}"
+  ```
+
+### Document Resource Server
+
+**Server Configuration:**
+- Name: "Knowledge Base"
+
+**Resource:**
+- Name: `company_docs`
+- URI: `file:///docs/company`
+- Description: "Company documentation"
+- MIME Type: `text/markdown`
 
 ## Development
 
-### Backend Development
+### Backend
 
-The FastAPI backend uses:
-- **FastAPI**: Modern, fast web framework
-- **Pydantic**: Data validation using Python type annotations
-- **CORS Middleware**: Configured for frontend access
-- **Uvicorn**: ASGI server for running the application
+Edit `backend/app/main.py` for API changes.
 
-To modify the API, edit `backend/app/main.py`.
+The backend uses:
+- **FastAPI**: Modern async web framework
+- **Pydantic**: Data validation
+- **CORS**: Configured for frontend access
 
-### Frontend Development
+### Frontend
 
-The React frontend uses:
-- **React 18**: Latest React with hooks
-- **Vite**: Next-generation frontend tooling
-- **React Flow**: Node-based UI library
-- **Axios**: HTTP client for API calls
+Edit files in `frontend/src/`.
 
-To modify the UI, edit files in `frontend/src/`.
+The frontend uses:
+- **React 18**: Modern React with hooks
+- **Vite**: Fast build tooling
+- **React Flow**: Free node-based UI
+- **GoJS**: Commercial node-based UI
+- **Axios**: HTTP client
 
 ### Environment Variables
 
-Copy `.env.example` to `.env` and customize as needed:
+Copy `.env.example` to `.env`:
 
 ```bash
-cp .env.example .env
+VITE_API_URL=http://localhost:8000
 ```
-
-Available variables:
-- `VITE_API_URL`: Backend API URL (default: http://localhost:8000)
 
 ## Building for Production
 
-### Using Docker (Recommended)
+### Docker (Recommended)
 
 ```bash
 docker-compose up --build
@@ -274,25 +414,15 @@ docker-compose up --build
 
 ### Manual Build
 
-#### Backend
-
-The FastAPI app is production-ready. For deployment:
+**Backend:**
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-#### Frontend
-
-Build the frontend:
+**Frontend:**
 ```bash
 cd frontend
 npm run build
-```
-
-The optimized build will be in the `frontend/dist` directory.
-
-Preview the production build:
-```bash
 npm run preview
 ```
 
@@ -300,25 +430,44 @@ npm run preview
 
 ### Docker Issues
 
-- **Port already in use**: Stop other services using ports 80 and 8000, or modify the ports in `docker-compose.yml`
-- **Container build fails**: Ensure Docker has enough memory allocated (at least 4GB recommended)
-- **Changes not reflected**: For dependency changes, rebuild with `docker-compose up --build`
+- **Port conflicts**: Modify ports in `docker-compose.yml`
+- **Build failures**: Ensure Docker has 4GB+ memory
+- **Changes not reflected**: Use `docker-compose up --build`
 
 ### Backend Issues
 
-- **Port already in use**: Change the port in the uvicorn command
-- **Module not found**: Ensure you've activated the virtual environment and installed dependencies
+- **Import errors**: Check virtual environment is activated
+- **Port in use**: Change port in uvicorn command
 
 ### Frontend Issues
 
-- **API connection failed**: Make sure the backend is running on port 8000
-- **Port 3000 in use**: Vite will automatically try the next available port
-- **Dependencies not found**: Run `npm install` again
+- **API connection failed**: Ensure backend is running on port 8000
+- **Module not found**: Run `npm install` again
+- **GoJS licensing warning**: Normal for evaluation use
 
 ## License
 
 This project is open source and available under the MIT License.
 
+**Note:** GoJS is a separate library with its own licensing requirements. See [gojs.net](https://gojs.net) for details.
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions welcome! Please submit a Pull Request.
+
+## Learn More
+
+- **MCP Documentation**: https://modelcontextprotocol.io
+- **React Flow**: https://reactflow.dev
+- **GoJS**: https://gojs.net
+- **FastAPI**: https://fastapi.tiangolo.com
+
+## Support
+
+For issues or questions:
+- Open an issue on GitHub
+- Check the API documentation at http://localhost:8000/docs
+
+---
+
+**Built with** ❤️ **for the MCP community**
