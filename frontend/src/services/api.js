@@ -60,4 +60,50 @@ export const flowAPI = {
   },
 };
 
+export const mcpAPI = {
+  // Create/update MCP server
+  createServer: async (config) => {
+    const response = await api.post('/mcp/server', config);
+    return response.data;
+  },
+
+  // Get all MCP servers
+  getServers: async () => {
+    const response = await api.get('/mcp/servers');
+    return response.data;
+  },
+
+  // Get specific MCP server
+  getServer: async (serverId) => {
+    const response = await api.get(`/mcp/server/${serverId}`);
+    return response.data;
+  },
+
+  // Delete MCP server
+  deleteServer: async (serverId) => {
+    const response = await api.delete(`/mcp/server/${serverId}`);
+    return response.data;
+  },
+
+  // Generate MCP server code
+  generateCode: async (serverId) => {
+    const response = await api.post(`/mcp/generate/${serverId}`);
+    return response.data;
+  },
+
+  // Export MCP server as ZIP
+  exportServer: async (serverId) => {
+    const response = await api.post(`/mcp/export/${serverId}`, {}, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  // Convert flow to MCP server
+  flowToServer: async (flowData) => {
+    const response = await api.post('/mcp/flow-to-server', flowData);
+    return response.data;
+  },
+};
+
 export default api;

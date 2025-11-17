@@ -10,10 +10,18 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import CustomNode from './CustomNode';
+import MCPServerNode from './MCPServerNode';
+import MCPToolNode from './MCPToolNode';
+import MCPResourceNode from './MCPResourceNode';
+import MCPPromptNode from './MCPPromptNode';
 import '../styles/NodeStyles.css';
 
 const nodeTypes = {
   custom: CustomNode,
+  mcpServer: MCPServerNode,
+  mcpTool: MCPToolNode,
+  mcpResource: MCPResourceNode,
+  mcpPrompt: MCPPromptNode,
 };
 
 const initialNodes = [
