@@ -1,0 +1,105 @@
+.custom-node {
+  background: white;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  padding: 1rem;
+  min-width: 150px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.custom-node:hover {
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.custom-node.selected {
+  border-color: #764ba2;
+  box-shadow: 0 0 0 2px rgba(118, 75, 162, 0.2);
+}
+
+.node-header {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-size: 0.875rem;
+}
+
+.node-content {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.node-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.node-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Custom node types */
+.custom-node.input-node {
+  border-color: #51cf66;
+}
+
+.custom-node.output-node {
+  border-color: #ff6b6b;
+}
+
+.custom-node.process-node {
+  border-color: #339af0;
+}
+
+/* React Flow overrides */
+.react-flow__node {
+  cursor: pointer;
+}
+
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  background: #667eea;
+  border: 2px solid white;
+}
+
+.react-flow__handle-top {
+  top: -5px;
+}
+
+.react-flow__handle-bottom {
+  bottom: -5px;
+}
+
+.react-flow__handle-left {
+  left: -5px;
+}
+
+.react-flow__handle-right {
+  right: -5px;
+}
+
+.react-flow__edge-path {
+  stroke: #667eea;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #764ba2;
+  stroke-width: 3;
+}
+
+.react-flow__controls {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.react-flow__background {
+  background-color: #fafafa;
+}
