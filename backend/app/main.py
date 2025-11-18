@@ -1,14 +1,20 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import io
 import zipfile
+import logging
 from .models import MCPServerConfig, MCPTool, MCPResource, MCPPrompt
 from .mcp_generator import generate_mcp_server, generate_requirements_txt, generate_readme
+from .server_manager import server_manager
 
-app = FastAPI(title="Node-based UI API with MCP Support", version="2.0.0")
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="Node-based UI API with MCP Hosting", version="3.0.0")
 
 # Configure CORS
 app.add_middleware(
@@ -269,3 +275,161 @@ async def convert_flow_to_mcp_server(flow_data: FlowData):
         "message": "Flow converted to MCP server configuration",
         "config": server_config
     }
+
+
+# ============================================
+# Hosted MCP Server Endpoints
+# ============================================
+
+class ToolCallRequest(BaseModel):
+    """Request to call a tool on a hosted server"""
+    tool_name: str
+    arguments: dict
+
+
+@app.post("/mcp/deploy/{server_id}")
+async def deploy_mcp_server(server_id: str):
+    """Deploy an MCP server to the hosting platform"""
+    if server_id not in mcp_servers_storage:
+        raise HTTPException(status_code=404, detail="MCP server configuration not found")
+
+    try:
+        config = mcp_servers_storage[server_id]
+
+        # Generate server code
+        server_code = generate_mcp_server(config)
+        requirements = generate_requirements_txt()
+
+        # Deploy to server manager
+        success = await server_manager.deploy_server(
+            server_id, config, server_code, requirements
+        )
+
+        if success:
+            return {
+                "message": "MCP server deployed successfully",
+                "server_id": server_id,
+                "url": f"/mcp/{server_id}",
+                "status": "running"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to deploy server")
+
+    except Exception as e:
+        logger.error(f"Deployment error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/mcp/deploy/{server_id}")
+async def undeploy_mcp_server(server_id: str):
+    """Stop and remove a hosted MCP server"""
+    success = await server_manager.stop_server(server_id)
+
+    if success:
+        return {"message": "Server stopped successfully", "server_id": server_id}
+    else:
+        raise HTTPException(status_code=404, detail="Server not found or already stopped")
+
+
+@app.post("/mcp/deploy/{server_id}/restart")
+async def restart_mcp_server(server_id: str):
+    """Restart a hosted MCP server"""
+    if server_id not in mcp_servers_storage:
+        raise HTTPException(status_code=404, detail="MCP server configuration not found")
+
+    try:
+        config = mcp_servers_storage[server_id]
+        server_code = generate_mcp_server(config)
+        requirements = generate_requirements_txt()
+
+        success = await server_manager.restart_server(
+            server_id, config, server_code, requirements
+        )
+
+        if success:
+            return {
+                "message": "Server restarted successfully",
+                "server_id": server_id,
+                "status": "running"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to restart server")
+
+    except Exception as e:
+        logger.error(f"Restart error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/mcp/hosted")
+async def list_hosted_servers():
+    """List all hosted MCP servers"""
+    servers = server_manager.list_servers()
+    return {
+        "servers": servers,
+        "count": len(servers)
+    }
+
+
+@app.get("/mcp/hosted/{server_id}/status")
+async def get_server_status(server_id: str):
+    """Get status of a hosted server"""
+    server = server_manager.get_server(server_id)
+
+    if not server:
+        raise HTTPException(status_code=404, detail="Server not found")
+
+    return server.get_status()
+
+
+@app.post("/mcp/{server_id}/tools/call")
+async def call_hosted_tool(server_id: str, request: ToolCallRequest):
+    """Call a tool on a hosted MCP server"""
+    server = server_manager.get_server(server_id)
+
+    if not server:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Server '{server_id}' not found or not running"
+        )
+
+    try:
+        result = await server.call_tool(request.tool_name, request.arguments)
+        return result
+    except Exception as e:
+        logger.error(f"Tool call error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/mcp/{server_id}/info")
+async def get_hosted_server_info(server_id: str):
+    """Get information about a hosted MCP server"""
+    server = server_manager.get_server(server_id)
+
+    if not server:
+        raise HTTPException(status_code=404, detail="Server not found")
+
+    if server_id not in mcp_servers_storage:
+        raise HTTPException(status_code=404, detail="Server configuration not found")
+
+    config = mcp_servers_storage[server_id]
+
+    return {
+        "server_id": server_id,
+        "name": config.get("name"),
+        "description": config.get("description"),
+        "version": config.get("version"),
+        "status": server.status,
+        "tools": config.get("tools", []),
+        "resources": config.get("resources", []),
+        "prompts": config.get("prompts", []),
+        "url": f"/mcp/{server_id}"
+    }
+
+
+# Cleanup on shutdown
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup all hosted servers on shutdown"""
+    logger.info("Shutting down all hosted MCP servers...")
+    await server_manager.cleanup_all()
+    logger.info("Shutdown complete")

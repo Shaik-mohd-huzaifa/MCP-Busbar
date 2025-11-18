@@ -104,6 +104,53 @@ export const mcpAPI = {
     const response = await api.post('/mcp/flow-to-server', flowData);
     return response.data;
   },
+
+  // ===== Hosted Server Management =====
+
+  // Deploy server to hosting platform
+  deployServer: async (serverId) => {
+    const response = await api.post(`/mcp/deploy/${serverId}`);
+    return response.data;
+  },
+
+  // Stop hosted server
+  undeployServer: async (serverId) => {
+    const response = await api.delete(`/mcp/deploy/${serverId}`);
+    return response.data;
+  },
+
+  // Restart hosted server
+  restartServer: async (serverId) => {
+    const response = await api.post(`/mcp/deploy/${serverId}/restart`);
+    return response.data;
+  },
+
+  // List all hosted servers
+  listHostedServers: async () => {
+    const response = await api.get('/mcp/hosted');
+    return response.data;
+  },
+
+  // Get hosted server status
+  getServerStatus: async (serverId) => {
+    const response = await api.get(`/mcp/hosted/${serverId}/status`);
+    return response.data;
+  },
+
+  // Get hosted server info
+  getServerInfo: async (serverId) => {
+    const response = await api.get(`/mcp/${serverId}/info`);
+    return response.data;
+  },
+
+  // Call tool on hosted server
+  callTool: async (serverId, toolName, arguments) => {
+    const response = await api.post(`/mcp/${serverId}/tools/call`, {
+      tool_name: toolName,
+      arguments: arguments
+    });
+    return response.data;
+  },
 };
 
 export default api;

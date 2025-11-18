@@ -6,11 +6,14 @@ A powerful visual builder for **Model Context Protocol (MCP) Servers** with dual
 
 - **🎨 Dual Diagram Libraries**: Choose between React Flow or GoJS for your preferred diagramming experience
 - **🔌 MCP Server Builder**: Visually design and generate complete MCP servers
+- **🚀 One-Click Deployment**: Deploy MCP servers directly to the platform with a single click
+- **☁️ Hosted Servers**: Host your MCP servers on the platform with unique URLs
 - **🛠️ Tool Creation**: Define custom tools with input schemas and implementations
 - **📚 Resource Management**: Configure resources with URIs and MIME types
 - **💬 Prompt Templates**: Create reusable prompt templates with arguments
-- **📦 One-Click Export**: Export complete MCP servers as ready-to-use ZIP files
-- **🚀 FastAPI Backend**: High-performance Python backend with RESTful API
+- **📦 Export & Download**: Export complete MCP servers as ready-to-use ZIP files
+- **📊 Server Management**: Monitor, restart, and manage your hosted servers
+- **🔗 HTTP API Access**: Call MCP server tools via REST API at `/mcp/{server_id}/tools/call`
 - **🐳 Docker Support**: Easy deployment with Docker and Docker Compose
 - **💾 Real-time Persistence**: Save and load your designs
 
@@ -247,6 +250,57 @@ Add to your Claude Desktop configuration (`claude_desktop_config.json`):
 }
 ```
 
+## Hosting Servers on the Platform
+
+MCP-Busbar now supports **hosting MCP servers directly on the platform**! Instead of just downloading and running servers locally, you can deploy them with one click.
+
+### Deploy a Server
+
+1. **Build Your Server**: Create your MCP server using the visual builder
+2. **Click "🚀 Deploy Server"**: This will:
+   - Convert your flow to an MCP server
+   - Deploy it to the hosting platform
+   - Assign it a unique URL
+3. **Access Your Server**: Navigate to the "Hosted Servers" tab to manage your deployment
+
+### Server URLs
+
+Each deployed server gets a unique URL pattern:
+
+```
+/mcp/{server_id}/
+```
+
+### Calling Hosted Server Tools
+
+Call tools on your hosted server via HTTP:
+
+```bash
+# Call a tool
+curl -X POST http://localhost:8000/mcp/{server_id}/tools/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool_name": "get_weather",
+    "arguments": {"location": "San Francisco"}
+  }'
+```
+
+### Managing Hosted Servers
+
+From the **Hosted Servers** dashboard, you can:
+
+- **View Status**: See which servers are running
+- **Get Info**: View server details, tools, resources, and prompts
+- **Restart**: Restart a server with updated code
+- **Stop**: Stop and remove a server
+- **Copy URL**: Copy the server's API endpoint
+
+### Server Lifecycle
+
+- **Running**: Server is active and accepting requests
+- **Stopped**: Server has been stopped
+- **Error**: Server encountered an error during startup
+
 ## API Endpoints
 
 ### Flow Management
@@ -270,6 +324,16 @@ Add to your Claude Desktop configuration (`claude_desktop_config.json`):
 - `POST /mcp/generate/{id}` - Generate server code
 - `POST /mcp/export/{id}` - Export server as ZIP
 - `POST /mcp/flow-to-server` - Convert flow to MCP server
+
+### Hosted Server Management
+
+- `POST /mcp/deploy/{id}` - Deploy server to hosting platform
+- `DELETE /mcp/deploy/{id}` - Stop and remove hosted server
+- `POST /mcp/deploy/{id}/restart` - Restart hosted server
+- `GET /mcp/hosted` - List all hosted servers
+- `GET /mcp/hosted/{id}/status` - Get server status
+- `GET /mcp/{id}/info` - Get hosted server information
+- `POST /mcp/{id}/tools/call` - Call a tool on hosted server
 
 ## Node Types
 

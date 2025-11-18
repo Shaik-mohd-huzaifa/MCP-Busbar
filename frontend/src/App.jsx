@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Flow from './components/Flow';
 import GoJSDiagram from './components/GoJSDiagram';
+import HostedServers from './components/HostedServers';
 import { flowAPI, mcpAPI } from './services/api';
 import './styles/App.css';
 
@@ -9,6 +10,8 @@ function App() {
   const [statusMessage, setStatusMessage] = useState(null);
   const [apiHealth, setApiHealth] = useState(false);
   const [diagramMode, setDiagramMode] = useState('reactflow'); // 'reactflow' or 'gojs'
+  const [viewMode, setViewMode] = useState('builder'); // 'builder' or 'hosted'
+  const [lastServerId, setLastServerId] = useState(null);
 
   // Check API health on mount
   useEffect(() => {
@@ -125,50 +128,98 @@ function App() {
     showStatus(`Switched to ${newMode === 'gojs' ? 'GoJS' : 'React Flow'} mode`, 'success');
   };
 
+  const handleDeployServer = async () => {
+    try {
+      // First convert flow to server
+      const result = await mcpAPI.flowToServer(currentFlow);
+
+      if (result.config && result.config.id) {
+        // Deploy the server
+        const deployResult = await mcpAPI.deployServer(result.config.id);
+
+        setLastServerId(result.config.id);
+        showStatus(`Server deployed! Access at ${deployResult.url}`, 'success');
+
+        // Switch to hosted view
+        setTimeout(() => setViewMode('hosted'), 1500);
+      }
+    } catch (error) {
+      console.error('Error deploying server:', error);
+      showStatus('Failed to deploy server', 'error');
+    }
+  };
+
   return (
     <div className="app">
       <header className="header">
-        <h1>MCP Busbar - Node-based UI Builder</h1>
+        <h1>MCP Busbar - MCP Server Platform</h1>
         <p>
-          Create and connect nodes to build MCP servers visually
+          {viewMode === 'builder' ? 'Build and deploy MCP servers visually' : 'Manage your hosted MCP servers'}
           {apiHealth && ' • Connected to API'}
           {!apiHealth && ' • API Disconnected'}
-          {' • '}
-          {diagramMode === 'gojs' ? 'GoJS Mode' : 'React Flow Mode'}
+          {viewMode === 'builder' && (
+            <>
+              {' • '}
+              {diagramMode === 'gojs' ? 'GoJS Mode' : 'React Flow Mode'}
+            </>
+          )}
         </p>
       </header>
 
-      <div className="controls">
-        <button className="btn-primary" onClick={toggleDiagramMode}>
-          Switch to {diagramMode === 'gojs' ? 'React Flow' : 'GoJS'}
+      <div className="view-tabs">
+        <button
+          className={`view-tab ${viewMode === 'builder' ? 'active' : ''}`}
+          onClick={() => setViewMode('builder')}
+        >
+          🛠️ Builder
         </button>
-        <button className="btn-success" onClick={handleSaveFlow}>
-          Save Flow
-        </button>
-        <button className="btn-info" onClick={handleLoadFlow}>
-          Load Flow
-        </button>
-        <button className="btn-warning" onClick={handleGenerateMCPServer}>
-          Generate MCP Server
-        </button>
-        <button className="btn-success" onClick={handleExportMCPServer}>
-          Export MCP Server (ZIP)
-        </button>
-        <button className="btn-danger" onClick={handleClearFlow}>
-          Clear Flow
-        </button>
-        <button className="btn-info" onClick={checkHealth}>
-          Check API
+        <button
+          className={`view-tab ${viewMode === 'hosted' ? 'active' : ''}`}
+          onClick={() => setViewMode('hosted')}
+        >
+          🚀 Hosted Servers
         </button>
       </div>
 
-      <div className="flow-container">
-        {diagramMode === 'reactflow' ? (
-          <Flow onFlowChange={handleFlowChange} />
-        ) : (
-          <GoJSDiagram onFlowChange={handleFlowChange} />
-        )}
-      </div>
+      {viewMode === 'builder' ? (
+        <>
+          <div className="controls">
+            <button className="btn-primary" onClick={toggleDiagramMode}>
+              Switch to {diagramMode === 'gojs' ? 'React Flow' : 'GoJS'}
+            </button>
+            <button className="btn-success" onClick={handleSaveFlow}>
+              Save Flow
+            </button>
+            <button className="btn-info" onClick={handleLoadFlow}>
+              Load Flow
+            </button>
+            <button className="btn-warning" onClick={handleGenerateMCPServer}>
+              Generate Code
+            </button>
+            <button className="btn-deploy" onClick={handleDeployServer}>
+              🚀 Deploy Server
+            </button>
+            <button className="btn-success" onClick={handleExportMCPServer}>
+              Export ZIP
+            </button>
+            <button className="btn-danger" onClick={handleClearFlow}>
+              Clear
+            </button>
+          </div>
+
+          <div className="flow-container">
+            {diagramMode === 'reactflow' ? (
+              <Flow onFlowChange={handleFlowChange} />
+            ) : (
+              <GoJSDiagram onFlowChange={handleFlowChange} />
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="hosted-container">
+          <HostedServers onStatusMessage={showStatus} />
+        </div>
+      )}
 
       {statusMessage && (
         <div className={`status-message ${statusMessage.type}`}>

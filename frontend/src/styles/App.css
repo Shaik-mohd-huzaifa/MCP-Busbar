@@ -37,6 +37,38 @@ body {
   margin-top: 0.25rem;
 }
 
+.view-tabs {
+  display: flex;
+  gap: 0;
+  background: #e9ecef;
+  padding: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.view-tab {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 6px;
+}
+
+.view-tab:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
+
+.view-tab.active {
+  background: white;
+  color: #667eea;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
 .controls {
   padding: 1rem 2rem;
   background: #f8f9fa;
@@ -104,6 +136,22 @@ body {
 
 .btn-warning:hover {
   background: #fd7e14;
+}
+
+.btn-deploy {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.btn-deploy:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3d96 100%);
+}
+
+.hosted-container {
+  flex: 1;
+  overflow-y: auto;
+  background: white;
 }
 
 .flow-container {
